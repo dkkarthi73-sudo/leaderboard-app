@@ -1,22 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IPL Leaderboard</title>
+  <title>IPL 2026 Leaderboard</title>
+  <style>
+    body { font-family: Arial; text-align:center; }
+    table { margin:auto; border-collapse: collapse; width: 95%; }
+    th, td { border:1px solid black; padding:8px; }
+    th { background:black; color:white; }
+    button { padding:10px; margin:10px; }
+  </style>
 </head>
 <body>
 
-<h1>🏏 IPL 2026 🔥 Leaderboard</h1>
+<h2>🏏 IPL 2026 Leaderboard</h2>
 
-<table border="1">
-<tr><th>Rank</th><th>Name</th><th>Points</th></tr>
+<button onclick="addMatch()">➕ Add Match Points</button>
 
-<tr><td>1 🥇</td><td>Karthi</td><td>100</td></tr>
-<tr><td>2 🥈</td><td>Player2</td><td>80</td></tr>
-<tr><td>3 🥉</td><td>Player3</td><td>60</td></tr>
-
+<table id="board">
+<tr>
+<th>Rank</th>
+<th>Name</th>
+<th>Total Points</th>
+</tr>
 </table>
 
-<p>✅ App is working</p>
+<script>
+
+// 👉 ADD YOUR 35 MEMBERS HERE (EDIT NAMES)
+let players = [
+"Karthi","Player2","Player3","Player4","Player5",
+"Player6","Player7","Player8","Player9","Player10",
+"Player11","Player12","Player13","Player14","Player15",
+"Player16","Player17","Player18","Player19","Player20",
+"Player21","Player22","Player23","Player24","Player25",
+"Player26","Player27","Player28","Player29","Player30",
+"Player31","Player32","Player33","Player34","Player35"
+];
+
+// store data
+let data = JSON.parse(localStorage.getItem("iplData")) || {};
+
+// init players
+players.forEach(p=>{
+  if(!data[p]) data[p] = [];
+});
+
+function addMatch(){
+  let lastMin = Infinity;
+
+  players.forEach(p=>{
+    let pts = prompt("Enter points for " + p + " (leave blank if missed)");
+    
+    if(pts === "" || pts === null){
+      data[p].push(null); // mark missing
+    } else {
+      pts = parseInt(pts);
+      data[p].push(pts);
+      if(pts < lastMin) lastMin = pts;
+    }
+  });
+
+  // apply -100 rule
+  players.forEach(p=>{
+    let arr = data[p];
+    if(arr[arr.length-1] === null){
+      arr[arr.length-1] = lastMin - 100;
+    }
+  });
+
+  localStorage.setItem("iplData", JSON.stringify(data));
+  render();
+}
+
+function render(){
+  let table = document.getElementById("board");
+  table.innerHTML = `
+  <tr>
+  <th>Rank</th>
+  <th>Name</th>
+  <th>Total Points</th>
+  </tr>`;
+
+  let arr = [];
+
+  players.forEach(p=>{
+    let total = data[p].reduce((a,b)=>a+(b||0),0);
+    arr.push({name:p, total});
+  });
+
+  arr.sort((a,b)=>b.total-a.total);
+
+  arr.forEach((p,i)=>{
+    let medal = i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    table.innerHTML += `
+    <tr onclick="showDetails('${p.name}')">
+      <td>${i+1} ${medal}</td>
+      <td>${p.name}</td>
+      <td>${p.total}</td>
+    </tr>`;
+  });
+}
+
+function showDetails(name){
+  alert(name + " match points: " + data[name].join(", "));
+}
+
+render();
+
+</script>
 
 </body>
 </html>
